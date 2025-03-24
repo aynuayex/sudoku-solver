@@ -14,18 +14,25 @@ module.exports = function (app) {
       if(!puzzle || !coordinate || !value) {
         return res.json({ error: 'Required field(s) missing' })
       }
-      if(/[^1-9.]/.test(puzzle)) {
-        return res.json({ error: 'Invalid characters in puzzle' })
+      const error = solver.validate(puzzle)
+
+      if(error) {
+        return res.json({error})
       }
-      if(!solver.validate(puzzle)) {
-        return res.json({ error: 'Expected puzzle to be 81 characters long' })
-      }
+
       if(!Object.keys(mapCoordinate).includes(coordinate[0]) || !(/^[1-9]$/.test(coordinate.slice(1)))) {
         return res.json({ error: 'Invalid coordinate'})
       }
       if(!(/^[1-9]$/.test(value))) {
         return res.json({ error: 'Invalid value' })
       }
+
+      // if value is already placed in puzzle return {valid:true} no need to check placement
+      const existingValue = puzzle[(mapCoordinate[coordinate[0]] - 1) * 9 + (parseInt(coordinate[1]) - 1)];
+      if (existingValue === value) {
+          return res.json({ valid: true });
+      }
+
       if(!solver.checkRowPlacement(puzzle, mapCoordinate[coordinate[0]], coordinate[1], value)) {
         conflict.push("row")
       }
@@ -35,14 +42,8 @@ module.exports = function (app) {
       if(!solver.checkRegionPlacement(puzzle, mapCoordinate[coordinate[0]], coordinate[1], value)) {
         conflict.push("region")
       }
-      const existingValue = puzzle[(mapCoordinate[coordinate[0]] - 1) * 9 + (parseInt(coordinate[1]) - 1)];
-      if (existingValue === value) {
-          return res.json({ valid: true });
-      }
 
-      // update here to check if it return true
-      // If the puzzle is invalid or cannot be solved
-      if(conflict.length > 0 ) {
+      if(conflict.length) {
         return res.json({valid: false, conflict})
       }
 
@@ -55,14 +56,11 @@ module.exports = function (app) {
       if(!puzzle) {
         return res.json({ error: 'Required field missing' })
       }
-      if(/[^0-9.]/.test(puzzle)) {
-        return res.json({ error: 'Invalid characters in puzzle' })
+      const error = solver.validate(puzzle)
+      if(error) {
+        return res.json({error})
       }
-      if(!solver.validate(puzzle)) {
-        return res.json({ error: 'Expected puzzle to be 81 characters long' })
-      }
-      // update here to check if it return true
-      // If the puzzle is invalid or cannot be solved
+      
       const solution = solver.solve(puzzle);
 
       if (solution === "Puzzle cannot be solved") {

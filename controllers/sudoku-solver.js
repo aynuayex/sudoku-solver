@@ -1,39 +1,33 @@
   class SudokuSolver {
 
     validate(puzzleString) {
-      if(puzzleString.length !== 81) {
-        return false
+      if(/[^1-9.]/.test(puzzleString)) {
+        return 'Invalid characters in puzzle'
       }
-      return true
+      if(puzzleString.length !== 81) {
+        return 'Expected puzzle to be 81 characters long'
+      }
+      return ''
     }
 
     checkRowPlacement(puzzleString, row, column, value) {
       for(let i = 0; i < 9; i++ ) {
-        if((puzzleString[((row - 1) * 9) + i] === value) && (((row - 1) * 9) + i !== (((row - 1) * 9) + column - 1))) return false
+        if(puzzleString[((row - 1) * 9) + i] === value) return false
       }
       return true
     }
 
-    // checkColPlacement(puzzleString, row, column, value) {
-    //   for(let i = 0; i < 9; i += 9 ) {
-    //     if((puzzleString[column + i - 1] === value) && ((column + i - 1) !== (row + column - 2))) return false
-    //   }
-    //   return true
-    // }
-
     checkColPlacement(puzzleString, row, column, value) {
-    for (let i = 0; i < 9; i++) { 
-        if ((puzzleString[column - 1 + i * 9] === value) && ((column - 1 + i * 9) !== (row - 1) * 9 + column - 1)) 
-            return false;
+      for (let i = 0; i < 9; i++) { 
+          if (puzzleString[(column - 1) + (i * 9)] === value) return false;
+      }
+      return true;
     }
-    return true;
-}
 
-    // checkRegionPlacement(puzzleString, row, column, value) {
-    //   for(let i = column - 2; i < column + 1; i++ ) {
-    //     for(let j = row - 2; j < row + 1; j += 9 ) {
-    //       if(puzzleString[i + j] === value && i + j !== row + column - 2) return false
-    //     }
+    // This also works
+    // checkColPlacement(puzzleString, row, column, value) {
+    //   for(let i = 0; i < 81; i += 9 ) {
+    //     if(puzzleString[(column - 1) + i] === value) return false
     //   }
     //   return true
     // }
@@ -45,8 +39,7 @@
       for (let i = 0; i < 3; i++) {
           for (let j = 0; j < 3; j++) {
               let index = (startRow + i) * 9 + (startCol + j);
-              if (puzzleString[index] === value && index !== (row - 1) * 9 + column - 1) 
-                  return false;
+              if (puzzleString[index] === value) return false;
           }
       }
       return true;
@@ -76,7 +69,7 @@
                         puzzleArray[i] = ".";  // Backtrack
                     }
                 }
-                return false;  // No valid number found, trigger backtracking
+                return false;  // No valid number found, trigger backtracking or finally return false
             }
         }
         return true;  // Solution found
